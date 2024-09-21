@@ -1,7 +1,6 @@
-import pytesseract
-import pandas as pd
 import cv2
 import numpy as np
+import pytesseract
 from pdf2image import convert_from_bytes
 
 def detect_tables(image):
@@ -33,15 +32,20 @@ def detect_tables(image):
 
     return table_data
 
-def extract_table_data(file_contents):
-    # Convert PDF to images if needed
-    images = convert_from_bytes(file_contents)
-    all_tables = []
+def extract_table_data(file_contents, file_type):
+    if file_type == 'pdf':
+        images = convert_from_bytes(file_contents)
+        all_tables = []
+        for image in images:
+            # Convert the PIL image to OpenCV format
+            image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+            tables = detect_tables(image_cv)
+            all_tables.extend(tables)
+        return all_tables
 
-    for image in images:
-        # Convert the PIL image to OpenCV format
-        image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-        tables = detect_tables(image_cv)
-        all_tables.extend(tables)
-
-    return all_tables
+    # For image files
+    nparr = np.frombuffer(file_contents, np.uint8)
+    image_cv = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    tables = detect_tables(image_cv)
+    
+    return tables

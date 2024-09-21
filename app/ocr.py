@@ -3,9 +3,9 @@ from pdf2image import convert_from_bytes
 import cv2
 import numpy as np
 
-def extract_text(file_contents):
-    # Convert PDF to images if needed
-    if file_contents.endswith(b'%PDF'):
+def extract_text(file_contents, file_type):
+    # For PDF files
+    if file_type == 'pdf':
         images = convert_from_bytes(file_contents)
         extracted_text = ""
         for image in images:
@@ -18,3 +18,6 @@ def extract_text(file_contents):
     nparr = np.frombuffer(file_contents, np.uint8)
     image_cv = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     return pytesseract.image_to_string(image_cv)
+
+
+
